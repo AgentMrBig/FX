@@ -14,23 +14,23 @@ import json
 # Supported resolution includes 1, 5, 15, 30, 60, D, W, M 
 # .Some timeframes might not be available depending on the exchange.
 
-us30_60 = fin.getFXCandles(fin.API_TOKEN, fin.US30, fin.setDateTimestamp('Nov 06, 2020'), fin.setDateTimestamp('Nov 08, 2020'), '60', 'json')
+# us30_60 = fin.getFXCandles(fin.API_TOKEN, fin.US30, fin.setDateTimestamp('Nov 06, 2020'), fin.setDateTimestamp('Nov 08, 2020'), '60', 'json')
 
-df = pd.read_json(us30_60)
-df = df.tail(1)
-df_f = fin.formatMarketData(df)
+# df = pd.read_json(us30_60)
+# df = df.tail(1)
+# df_f = fin.formatMarketData(df)
 
-df_c = df_f['c']
+# df_c = df_f['c']
 
-# moving averages
-short_ema = df_c.ewm(span=2, adjust = False).mean()
+# # moving averages
+# short_ema = df_c.ewm(span=2, adjust = False).mean()
 
-long_ema = df_c.ewm(span=7, adjust = False).mean()
+# long_ema = df_c.ewm(span=7, adjust = False).mean()
 
-df_f['slow'] = short_ema
-df_f['fast'] = long_ema
+# df_f['slow'] = short_ema
+# df_f['fast'] = long_ema
 
-print(df_f.tail())
+# print(df_f.tail())
 
 # Create an interactive candlestick chart
 # figure = go.Figure(
@@ -81,21 +81,26 @@ def chartAdvance():
       # df = df.tail(1)
       # df = fin.formatMarketData(df)
       
-      us30_60 = fin.getFXCandles(fin.API_TOKEN, fin.US30, fin.setDateTimestamp('Nov 06, 2020'), fin.setDateTimestamp('Nov 08, 2020'), '60', 'json')
+      us30_60 = fin.getFXCandles(fin.API_TOKEN, fin.US30, fin.setDateTimestamp('Nov 06, 2020'), datetime.datetime.now(), '60', 'json')
 
       df = pd.read_json(us30_60)
       df = df.tail(1)
       df_f = fin.formatMarketData(df)
       
-      short_ema = df_c.ewm(span=2, adjust = False).mean()
+      df_c = df_f['c']
+      
+      ema1 = 2
+      ema2 = 7
+      
+      short_ema = df_c.ewm(span=ema1, adjust = False).mean()
 
-      long_ema = df_c.ewm(span=7, adjust = False).mean()
+      long_ema = df_c.ewm(span=ema2, adjust = False).mean()
 
-      df_f['slow'] = short_ema
-      df_f['fast'] = long_ema
+      df_f['ma{}'.format(ema1)] = short_ema
+      df_f['ma{}'.format(ema2)] = long_ema
 
 
-      print("New Candle")
+      # print("New Candle")
       if prevData.empty == True:
         print("prevData empty!")
         newCandleMoment = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
@@ -103,7 +108,10 @@ def chartAdvance():
         print("Previous data = ", prevData)
         print("new data = ", df_f)
         prevData = df_f
-      elif df_f.empty != True:
+      elif prevData.empty != True:
+        print("prevData not empty!")
+        print("df_c = ", df_c)
+        print("prevData['c'] = {}".format(prevData['c']))
         if int(df_f['c']) != int(prevData['c']):
           print("dataframes not equal!")
           newCandleMoment = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
@@ -112,6 +120,8 @@ def chartAdvance():
           print("new data = ", df_f)
           prevData = df_f
   
+
+
 def timeStuff():
   # currentSecond = datetime.datetime.now() / 60
   
